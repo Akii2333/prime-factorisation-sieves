@@ -1,0 +1,65 @@
+unction quadratic()
+
+% the method is split into 2 parts: data collection part & data process part 
+% this method is an improvement to Dixon?s factorization method
+% the main difference is the method to calculate the w = z^2(modN) is B-smooth
+% this method compute z =q(x) = (x+m)^2 - N, m is an integer
+
+%-------------------------------------------------------------------------%
+% STEP 1 : select a large intger N to factorise and calculate sqrt(N)
+N = input('a large integer');
+sqrtN = floor(sqrt(N));
+
+%-------------------------------------------------------------------------%
+% STEP 2 : select a factor base in size t
+% -1 is always included in the base 
+% need a bound B (integer)
+% Wikipedia suggests 'the ideal factor base size is 
+% some power of exp(sqrt(log(N) * log(log(N))))'
+% then use 1/2 as the power 
+B = exp(sqrt(log(N) * log(log(N))))*(1/2);
+
+% find the factor base
+% NOTE: N must be quadratic residue (mod P), p => any element in the base
+% i.e. x^n = N mod(p), x in N OR Legendre(N, p) = 1
+factorbase = quadraticbase(B,N);
+%-------------------------------------------------------------------------%
+%==========================================%
+function factorbase = quadraticbase(P,Q)
+
+% find factorbase for quadratic sieve
+% since bound B here = the order of the base, so we use Sieve of Eratosthenes
+% to find a set of primes the select the eligible primes from the set to
+% form the factor base, hence the searching scope should be much larger
+primeset = sieve_erastothenes(P*10);% the searching field is 10 times of B
+
+% define the factor base to be a set lways containing '-1'
+factorbase = [-1];
+
+%use a loop to full in factor base by selecting eligible primes from primeset
+for i = 1: size(primeset)
+    L = numlib::msqrts(Q, primeset(i));
+    if L ~= []
+        % numlib::msqrts uses D. Shanks' algorithm RESSOL
+        % i.e. N is a quadratic residue (mod primeset(i))
+       baseindex = size(factorbase) + 1;
+       factorbase(baseindex) = primeset(i);
+        % extend factorbase by adding one element in a iteration
+        % alternatively, to achieve the function of this 'if' state & 'L'
+        % we could use legendre symbol
+   	% L = numlib::legendre(Q,primeset(i));
+    	% if L = 1
+    	%   baseindex = size(factorbase) + 1;
+    	%   factorbase(baseindex) = primeset(i);
+    	end
+    else
+    end
+    
+    % check if the order of factorbase is B
+    if size(factorbase) < P
+           % check if the order of factorbase is B
+          continue  
+       else
+          break % stop loop since we collect sufficent elements for factorbase
+    end
+end
