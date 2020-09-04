@@ -1,0 +1,14 @@
+function sieve_erastothenes()
+%To findallprimesinaliststartingfrom2toN
+N =input(’Enteraupperlimit’);
+primes =2:N;
+p =2;
+N1= sqrt(N);
+while p<=N1
+for i=2*p:p:N
+primes (i-1)=0;
+end
+p =p+1;
+end
+primes =primes(primes>0)
+end
