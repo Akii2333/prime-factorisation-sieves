@@ -1,0 +1,35 @@
+function fermatMethod()
+
+%  if an odd integer N could be writien in the form: 
+%  N = a^2 - b^2 => N = (a+b)(a-b)
+%  then it follows a^2 is congruent b^2 mod N => fermat's little theorem
+%  this algorithm factors an odd number into 2 odd numbers if possible
+%  or the odd number input is a prime
+
+%  N should be odd
+N = input('The number for factorisation is  ');
+%  find the value of 'a' satisfying the congrueunce
+%  'a' should be equal to(b = 0) or larger than sqrt(N) 
+A = ceil(sqrt(N)); 
+%  narrow the upper range of 'a', since (a+b)(a-b) = N => a < N
+UL = N - A;
+%  initialise the value of factor of N, 1 and N itself
+f1 = 1;
+f2 = N;
+
+%  use a for loop to do trials, starting from 'a' to be the integer equal to 
+%  or larger than sqrt(N)
+for i = 1:1:UL% iteration numbers
+    B = A^2 - N;
+    Bsr = sqrt(B);
+    if floor(Bsr) == Bsr %  determine if sqrt(B) is an integer
+       f1=A+Bsr;
+       f2=A-Bsr;
+       continue 
+       %  quit this iteration, move to the the next iteration within the loop
+    end
+    A = A + 1;
+end
+
+disp(['two factors of ', num2str(N), ' are ' , 
+num2str(f1), ' and ', num2str(f2)]);
