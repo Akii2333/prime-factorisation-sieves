@@ -1,0 +1,32 @@
+function result=primeINarray()
+
+upperlimit =input(’enterupperlimitoftherange’);
+lowerlimit =input(’enterlowerlimitoftherange’);
+array =lowerlimit;
+
+while array<=upperlimit
+	result =true;
+	divisor =2;
+	limit =sqrt(upperlimit);
+	
+	if array<2
+		result =false;
+	elseif array==2
+		result =true;
+	else
+		for divisor=2:1:limit
+			remainer =rem(array,divisor);
+				if remainer==0
+					result =false;
+				else
+				end
+		end
+end
+
+	if result~=false
+		disp (array);
+	else
+	end
+	
+	array =array+1;
+end
