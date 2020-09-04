@@ -1,0 +1,62 @@
+function EulerMethod()
+function EulerMethod()
+% STEP 1: determine if N could be written as the sum of 2 squares
+%STEP 2: find the value of: N = a^2 + b^2 = c^2 + d^2 
+% k = (a-c, d-b), l = (a-c)/k, m = (d-b)/k
+% STEP 3: N = [(k/2)^2+(l/2)^] x (l^2 + m^2)
+
+% STEP 1
+% Check the positivity of N
+N = input('an integer for factorisation');
+
+if N < 0 || N == 0
+    N = input('N need to be a positive integer'); 
+else
+end
+
+% find first set of squares if possible 
+A = 1;
+B = N;
+for i = 1:1:sqrt(N)
+    Bsq = N - A^2;
+    Bsr = sqrt(Bsq);
+    if rem(Bsr,1) == 0
+        B = Bsr;
+        disp(B);
+    else
+        A = A + 1;
+    end
+end
+
+% find second set of squares if possible 
+C = 1;
+D = N;
+for i = 1:1:sqrt(N)
+    Dsq = N - C^2;
+    Dsr = sqrt(Bsq);
+    if rem(Dsr,1) == 0 && D ~= B
+        D = Dsr;
+        disp(D);
+    else
+        C = C + 1;
+    end
+end
+
+% STEP 2
+% determind if we could continue calculating k, l, m, N
+if (A == 1 && B ==1) || (C == 1 && D ==1)
+   disp('can''t proceed Euler''s  mthod ');
+else
+   K = gcd((A-C), (B-D));
+   L = (A-C)/K;
+   M = (D-B)/L;
+   Q = (A+C)/M;
+   
+   % STEP 3
+   % N = ((K/2)^2+(L/2)^2)*(L^2+M^2);
+   Factor1 = (K/2)^2+(Q/2)^2;
+   Factor2 = L^2+M^2;
+end
+
+disp([num2str(N), ' could be factored into ', 
+num2str(Factor1), ' and ', num2str(Factor2)]);
