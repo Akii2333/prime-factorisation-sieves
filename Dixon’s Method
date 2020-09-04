@@ -1,0 +1,238 @@
+function DixonMethod()
+
+% the method is split into 2 parts: data collection part & data process part 
+% this method is hugely similar to quadratic sieve method
+% the main difference is the method to calculate the w = z^2(modN) is B-smooth
+% this method choose a z randomly then to check if w is B-smooth
+% but in the algorithm below using the exhasut search to find each possible z
+
+%-------------------------------------------------------------------------%
+% STEP 1 : select a large intger N to factorise and calculate sqrt(N)
+N = input('a large integer');
+sqrtN = ceil(sqrt(N));
+
+%-------------------------------------------------------------------------%
+% STEP 2 : select a factor base
+% need a bound B (integer)
+% Wikipedia suggests 'the ideal factor base size is 
+% some power of exp(sqrt(log(N) * log(log(N))))'
+% then use 1/2 as the power 
+B = exp(sqrt(log(N) * log(log(N))))^(1/2);
+
+% find the factor base, using Sieve of Eratosthenes
+factorbase = sieve_erastothenes(B);
+
+%-------------------------------------------------------------------------%
+% STEP 3 : collect pairs of congruences of squares(mod N)
+
+% clacualte w = z^2(modN) by choosing z from sqrt(N) to N
+sizeArray = N - sqrtN;
+w = zeros(1,sizeArray);
+z = sqrtN : N;
+for i= 1:sizeArray
+    w(i) = rem(z(i)^2, N);  
+end
+
+% search for all elements in w that is b-smooth
+for i = 1 :size(w)
+    %check if a certain w is b-smooth
+    z(i)= Bsmooth(w(i), z(i), factorbase);
+end
+
+% build an new set containing all z with b-smoothed w -> remove all 0 from z
+% since we define z = 0 if w is not b-smooth from the previous step
+newz = nonzeros(z);
+% build an new set containing all b-smoothed w
+neww = zeros(1,size(newz));
+for i= 1:size(newz)
+    neww(i) = rem(newz(i)^2, N);  
+end
+
+% factorise each elemnt in neww
+store_power = zeros(size(factorbase), size(neww));
+% define a size(factorbase) x size(neww) matrix M to store vectors consist 
+% numbers of factors of each w(i) in w
+for 1= 1: size(neww)
+    factors_w = factor(neww(i));
+    Vector_C =countnumber(factorbase, factors_w);
+    %returns a size(factorbase) x 1 matrix
+    % alternatively, could use the codes below to count numbers 
+    % [a,b] = histc(factorbase, unique(factors_w));
+    % y = a(b);
+    
+    % Create a vector that consists of all the exponents of the prime 
+    % factorization of b over factor base
+    store_power(:, i) = c;%store the vector in matrix 
+end
+% this for loop returns a matrix consists all exponents of the powers of 
+% prime factorization of w over facto rbase.
+
+% build another matrix N consisting all exponents that Vector_C(mod)2 
+% -> determine if each elemnt in Vector_C is even
+if_even = rem(store_power,2);
+% the entries in this vectors are 0s and 1s only
+
+%-------------------------------------------------------------------------%
+% STEP 4:use linear equation to find the combination of z_is stsifying the 
+% power of the corresponding w_is are even
+combination = numlib::lincongruence(if_even,0,2);
+% returns a size(neww) x 1 marix 
+
+%-------------------------------------------------------------------------%
+% STEP 5: compute RHS value Y in congruence -> products of w_is
+% compute the vector w satisifying the linear equation in in STEP 4  
+RHS_factorpower = store_power * combination;
+% it is a size(factorbase) x 1 matrix
+
+%compute RHS value Y in congruence -> products of w_is
+Y = 1;
+for i = 1:size(factorbase)
+    Y = Y * factorbase(i) * RHS_factorpower(i);
+end
+
+%-------------------------------------------------------------------------%
+% STEP 5: compute LHS value X -> the product of z_is
+% since matrix M and matrix N are the same size in the relation
+X = 1;
+for i = 1 : size(newz): 
+    Y = Y*(newz(i)^2*combination(i));
+end
+% alternatively, use matirx multiplication as below
+% X = newz.^2*combination
+% newz.^2 squares each element in newz AND it is still a vector/ row matrix
+% combination is a column matrix/ a vector
+
+%-------------------------------------------------------------------------%
+% STEP 6: check if thefactorisation could be trivial-> X = Y
+% if trivial, then go back to step 4 to fina another linear combination
+% satisifying the relation if z_is and w_is
+if X = Y
+   combination = numlib::lincongruence(if_even,0,2);
+   RHS_factorpower = if_even * combination;
+   Y = 1;
+    for i = 1:size(factorbase)
+        Y = Y * factorbase(i) * RHS_factorpower(i);
+    end
+    X = 1;
+    for i = 1: 
+        Y = Y*newz(conbination(i))^2;
+    end
+else % if X ~= Y, then change nothing and continue the computation
+    X = X,
+    Y = Y,
+end
+
+%-------------------------------------------------------------------------%
+% STEP 7: compute the factorisation of N
+% factorise N into 2 factors
+factor1 = gcd((Y+X), N);
+factor2 = gcd((Y-X), N)
+
+%-------------------------------------------------------------------------%
+END OF THE DIXON'S FACTORISATION METHOD
+
+%==========================================%
+function primes = sieve_erastothenes(N)
+
+% N = input('Enter a upper limit ');
+primes = 2:N;
+p=2;
+N1=sqrt(N);
+
+while p <= N1
+    for i = 2*p:p:N
+        primes(i-1) = 0;
+    end
+    p = p + 1;
+end
+
+primes = primes(primes > 0)
+
+end
+
+%==========================================%
+function zvalue = Bsmooth(w,z,factorbase)
+
+% check if w is B-smooth
+% factors -> a set contains all factors of a particular w in ascent order
+factors = factor(w);
+% pick up all non-repeated elements from the factors in ascent order
+fitered_factor = unique(factors);
+% determine if non-repeated elements elements are all in factor base
+% return an array of logical values
+comparison = ismember(filtered_factor, factorbase);
+for i = 1: size(comparison)
+    if comparison(i) == 1
+        % w = w;
+        z = z;
+    else 
+        % w = 0;%change w into 0 if w is not b-smooth, 
+        z = 0;% change w into 0 if w is not b-smooth, the z is kicked out
+        break
+    end
+end
+% the for loop above will return w if w is b-smooth
+% change w into 0 if w is not b-smooth
+zvalue = z;
+
+%==========================================%
+function COUNT = countmember(A,B)
+
+% this is not a matlab builtin function, it is developed by JOS(10586) 
+% on MATLAB Central File Exchange updated 20 Jan 2019
+% cited as 'Jos (10584) (2019). countmember (https://www.mathworks.com/
+% matlabcentral/fileexchange/7738-countmember), MATLAB Central File Exchange. 
+% Retrieved October 21, 2019.'
+%-------------------------------------------------------------------------%
+% COUNTMEMBER - count members
+%
+%   COUNT = COUNTMEMBER(A,B) counts the number of times the elements of array A are
+%   present in array B, so that C(k) equals the number of occurences of
+%   A(k) in B. A may contain non-unique elements. C will have the same size as A.
+%   A and B should be of the same type, and can be cell array of strings.
+%
+%   Examples:
+%     countmember([1 2 1 3],[1 2 2 2 2])
+%       %  -> 1     4     1     0
+%     countmember({'a','b','c'}, {'a','x','a'})
+%       % -> 2     0     0
+%
+%     Elements = {'H' 'He' 'Li' 'C' 'N' 'O'} ;
+%     Sample = randsample(Elements, 1e6, true,[.5 .1 .2 .1 .05 .05]) ;
+%     bar(countmember(Elements, Sample)) ;
+%     set(gca, 'xticklabel', Elements)
+%     xlabel('Chemical element'), ylabel('N') ;
+%
+%   See also ISMEMBER, UNIQUE, HISTC
+% tested in R2018b
+% version 2.1 (jan 2019)
+% (c) Jos van der Geest
+% email: samelinoa@gmail.com
+% History:
+% 1.0 (2005) created
+% 1.1 (??): removed dum variable from [AU,dum,j] = unique(A(:)) to reduce
+%    overhead
+% 1.2 (dec 2008) - added comments, fixed some spelling and grammar
+%    mistakes, after being selected as Pick of the Week (dec 2008)
+% 2.0 (apr 2016) - updated for R2015a
+% 2.1 (jan 2019) - using histcounts instead of histc; minor grammar fixes
+% input checks
+narginchk(2,2) ;
+if ~isequal(class(A), class(B))
+    error('Both inputs should be of the same class.') ;
+end
+if isempty(A) || isempty(B)
+    % nothing to do
+    COUNT = zeros(size(A)) ;
+else    
+    % which elements are unique in A,
+    % also store the position to re-order later on
+    [AUnique, ~, posJ] = unique(A(:)) ;
+    % assign each element in B a number corresponding to the element of A
+    [~, loc] = ismember(B, AUnique) ;
+    % count these numbers
+    N = histcounts(loc(:), 1:length(AUnique)+1) ;
+    % re-order according to A, and reshape
+    COUNT = reshape(N(posJ),size(A)) ;
+end
+%-------------------------------------------------------------------------%
