@@ -1,0 +1,17 @@
+function euclidean_algorithm()
+a =input(’anpositiveinteger’);
+b =input(’anotherpositiveinteger’);
+A =a;
+B =b;
+while true
+remainder =mod(A,B);
+A =B;
+B =remainder;
+if R=0
+break;
+end
+end
+gcd =A;
+end
+disp([’the greatestcommondivisorof’,num2str(a),’and’,
+num2str(b), ’is’,num2str(gcd)])
